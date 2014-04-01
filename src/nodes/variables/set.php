@@ -51,7 +51,7 @@ class ezcWorkflowNodeVariableSet extends ezcWorkflowNode
      * @param mixed $configuration
      * @throws ezcBaseValueException
      */
-    public function __construct( $configuration = '' )
+    public function __construct( $configuration = '', $database_node_id = null )
     {
         if ( !is_array( $configuration ) )
         {
@@ -60,7 +60,7 @@ class ezcWorkflowNodeVariableSet extends ezcWorkflowNode
             );
         }
 
-        parent::__construct( $configuration );
+        parent::__construct( $configuration, $database_node_id );
     }
 
     /**

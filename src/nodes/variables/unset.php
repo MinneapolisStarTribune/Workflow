@@ -54,7 +54,7 @@ class ezcWorkflowNodeVariableUnset extends ezcWorkflowNode
      * @param mixed $configuration
      * @throws ezcBaseValueException
      */
-    public function __construct( $configuration = '' )
+    public function __construct( $configuration = '', $database_node_id = null )
     {
         if ( is_string( $configuration ) )
         {
@@ -68,7 +68,7 @@ class ezcWorkflowNodeVariableUnset extends ezcWorkflowNode
             );
         }
 
-        parent::__construct( $configuration );
+        parent::__construct( $configuration, $database_node_id );
     }
 
     /**

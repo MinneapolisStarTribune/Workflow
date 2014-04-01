@@ -259,20 +259,35 @@ abstract class ezcWorkflowExecution
         $this->resumed   = false;
         $this->suspended = false;
 
-        $this->doStart( $parentId );
-        $this->loadFromVariableHandlers();
+        /**
+         * Restructure start/resume to a more standard transaction-based paradigm with 
+         * try/catch. Ensure we return the execution id, else we do not know what to 
+         * resume. Set variable 'exception' to the exception message, if one was caught 
+         * here. 
+         */
+        $this->beginTransaction();
+        try {
+            $this->doStart( $parentId );
+            $this->loadFromVariableHandlers();
 
-        foreach ( $this->plugins as $plugin )
-        {
-            $plugin->afterExecutionStarted( $this );
+            foreach ( $this->plugins as $plugin )
+            {
+                $plugin->afterExecutionStarted( $this );
+            }
+
+            // Start workflow execution by activating the start node.
+            $this->workflow->startNode->activate( $this );
+
+            // Continue workflow execution until there are no more
+            // activated nodes.
+            $this->execute();
+        } catch(\Exception $e) {
+            $this->setVariable('exception', $e->getMessage());
+            if(!($this->isSuspended())) {
+                $this->suspend();
+            }
         }
-
-        // Start workflow execution by activating the start node.
-        $this->workflow->startNode->activate( $this );
-
-        // Continue workflow execution until there are no more
-        // activated nodes.
-        $this->execute();
+        $this->commit();
 
         // Return execution ID if the workflow has been suspended.
         if ( $this->isSuspended() )
@@ -349,38 +364,63 @@ abstract class ezcWorkflowExecution
         $this->resumed   = true;
         $this->suspended = false;
 
-        $this->doResume();
-        $this->loadFromVariableHandlers();
+        /**
+         * Restructure start/resume to a more standard transaction-based paradigm with 
+         * try/catch 
+         */
+        $this->beginTransaction();
+        try {
+            $this->doResume();
+            $this->loadFromVariableHandlers();
 
-        $errors = array();
+            $errors = array();
 
-        foreach ( $inputData as $variableName => $value )
-        {
-            if ( isset( $this->waitingFor[$variableName] ) )
+            foreach ( $inputData as $variableName => $value )
             {
-                if ( $this->waitingFor[$variableName]['condition']->evaluate( $value ) )
+                if ( isset( $this->waitingFor[$variableName] ) )
                 {
-                    $this->setVariable( $variableName, $value );
-                    unset( $this->waitingFor[$variableName] );
-                }
-                else
-                {
-                    $errors[$variableName] = (string)$this->waitingFor[$variableName]['condition'];
+                    if ( $this->waitingFor[$variableName]['condition']->evaluate( $value ) )
+                    {
+                        $this->setVariable( $variableName, $value );
+                        unset( $this->waitingFor[$variableName] );
+                    }
+                    else
+                    {
+                        $errors[$variableName] = (string)$this->waitingFor[$variableName]['condition'];
+                    }
                 }
             }
+        } catch (\Exception $e) {
+            $errors['caught exception'] = $e->getMessage();
         }
 
         if ( !empty( $errors ) )
         {
+            /**
+             * If we are using the database tie-in, we have begun a transaction. Roll it 
+             * back before throwing the exception so that the database remains in an 
+             * acceptable state. 
+             */
+            $this->rollback();
             throw new ezcWorkflowInvalidInputException( $errors );
         }
 
-        foreach ( $this->plugins as $plugin )
-        {
-            $plugin->afterExecutionResumed( $this );
-        }
+        try {
+            foreach ( $this->plugins as $plugin )
+            {
+                $plugin->afterExecutionResumed( $this );
+            }
 
-        $this->execute();
+            $this->execute();
+        } catch (\Exception $e) {
+            $this->setVariable('exception', $e->getMessage());                
+            if(!($this->isSuspended())) {                                     
+                $this->suspend();                                             
+            }                                                                 
+            $this->commit();
+            throw $e;
+        }
+        $this->commit();
 
         // Return execution ID if the workflow has been suspended.
         if ( $this->isSuspended() )
@@ -389,6 +429,24 @@ abstract class ezcWorkflowExecution
             return $this->id;
             // @codeCoverageIgnoreEnd
         }
+    }
+
+    /**
+     * Before throwing the exception, get back to an acceptable state
+     */
+    protected function rollback() {
+    }
+
+    /**
+     * Begin Transaction invoked in suspend/resume
+     */
+    protected function beginTransaction() {
+    }
+
+    /**
+     * Commit Transaction invoked in suspend/resume
+     */
+    protected function commit() {
     }
 
     /**
@@ -513,6 +571,17 @@ abstract class ezcWorkflowExecution
                     // nodes.
                     unset( $this->activatedNodes[$key] );
                     $this->numActivatedNodes--;
+                    /**
+                     * Two node counts must remain in sync - the number of activated nodes, and the 
+                     * number of end nodes. 
+                     *  
+                     * When testing for End Node, test for not being Cancel Node, because Cancel 
+                     * Node is a subclass of End Node. 
+                     */
+                    if($node instanceof ezcWorkflowNodeEnd &&
+                       !$node instanceof ezcWorkflowNodeCancel) {
+                        $this->numActivatedEndNodes--;
+                    }
 
                     // Notify plugins that the node has been executed.
                     if ( !$this->cancelled && !$this->ended )
@@ -861,6 +930,17 @@ abstract class ezcWorkflowExecution
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Returns the next thread ID. 
+     *  
+     * @return int 
+     * @ignore 
+     */
+    public function getNextThreadId()
+    {
+        return $this->nextThreadId;
     }
 
     /**

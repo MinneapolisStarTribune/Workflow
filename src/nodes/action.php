@@ -101,7 +101,7 @@ class ezcWorkflowNodeAction extends ezcWorkflowNode
      * @param mixed $configuration
      * @throws ezcWorkflowDefinitionStorageException
      */
-    public function __construct( $configuration )
+    public function __construct( $configuration, $database_node_id = null )
     {
         if ( is_string( $configuration ) )
         {
@@ -113,7 +113,7 @@ class ezcWorkflowNodeAction extends ezcWorkflowNode
             $configuration['arguments'] = array();
         }
 
-        parent::__construct( $configuration );
+        parent::__construct( $configuration, $database_node_id );
     }
 
     /**

@@ -178,8 +178,10 @@ abstract class ezcWorkflowNode implements ezcWorkflowVisitable
      *
      * @param mixed $configuration
      */
-    public function __construct( $configuration = null )
+    public $database_node_id;
+    public function __construct( $configuration = null, $database_node_id = null )
     {
+        $this->database_node_id = $database_node_id;
         if ( $configuration !== null )
         {
             $this->configuration = $configuration;
@@ -345,7 +347,16 @@ abstract class ezcWorkflowNode implements ezcWorkflowVisitable
      */
     public function setId( $id )
     {
-        $this->id = $id;
+        $this->id = $this->database_node_id ? $this->database_node_id : $id;
+    }
+
+    /**
+     * Return the database node id of this node 
+     * @return integer 
+     * @ignore 
+     */
+    public function database_node_id() {
+        return $this->database_node_id;
     }
 
     /**
