@@ -207,10 +207,14 @@ class ezcWorkflowExecutionListenerTest extends ezcWorkflowTestCase
             'WorkflowEventLogTiein' . DIRECTORY_SEPARATOR . 'tests' .
             DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . $log . '.log';
         if(!file_exists($file)) {
-            $file = 
-                dirname( dirname( dirname( __FILE__ ) ) ) . DIRECTORY_SEPARATOR .
-                'workflow-event-log-tiein' . DIRECTORY_SEPARATOR . 'tests' .
-                DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . $log . '.log';
+            $target = "workflow-event-log-tiein/tests/data";
+            $parent = dirname(__DIR__);
+            $grandparent = dirname($parent);
+            $dir = "$parent/vendor/zetacomponents/$target";
+            if(!is_dir($dir)) {
+                $dir = "$grandparent/$target";
+            }
+            $file = "$dir/$log.log";
         }
         $lines = file(
             $file
