@@ -93,7 +93,7 @@ class ezcWorkflowNodeSubWorkflow extends ezcWorkflowNode
      *
      * @param mixed $configuration
      */
-    public function __construct( $configuration )
+    public function __construct( $configuration, $database_node_id = null )
     {
         if ( is_string( $configuration ) )
         {
@@ -107,7 +107,7 @@ class ezcWorkflowNodeSubWorkflow extends ezcWorkflowNode
             );
         }
 
-        parent::__construct( $configuration );
+        parent::__construct( $configuration, $database_node_id );
     }
 
     /**

@@ -42,9 +42,42 @@
     "name": "zetacomponents/workflow",
     "type": "library",
     "require": {
-        "zetacomponents/base": "*"
+        "php": ">=5.3.0",
+        "zetacomponents/database": "dev-initial-pull",
+        "zetacomponents/base": "dev-initial-pull"
     },
     "require-dev": {
-        "zetacomponents/unit-test": "*"
+        "phpunit/phpunit": "4.0.*",
+        "zetacomponents/event-log": "dev-master",
+        "zetacomponents/workflow-event-log-tiein": "dev-initial-pull",
+        "zetacomponents/workflow-database-tiein": "dev-initial-pull",
+        "zetacomponents/unit-test": "dev-initial-pull"
+    },
+    "repositories": [
+    {
+        "type": "git",
+        "url": "git@github.com:ewbarnard/Base.git"
+    },
+    {
+        "type": "git",
+        "url": "git@github.com:ewbarnard/Database.git"
+    },
+    {
+        "type": "git",
+        "url": "git@github.com:zetacomponents/EventLog.git"
+    },
+    {
+        "type": "git",
+        "url": "git@github.com:ewbarnard/UnitTest.git"
+    },
+    {
+        "type": "git",
+        "url": "git@github.com:ewbarnard/WorkflowDatabaseTiein.git"
+    },
+    {
+        "type": "git",
+        "url": "git@github.com:ewbarnard/WorkflowEventLogTiein.git"
     }
+    ],
+    "minimum-stability": "stable"
 }

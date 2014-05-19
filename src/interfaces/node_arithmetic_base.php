@@ -72,10 +72,6 @@ abstract class ezcWorkflowNodeArithmeticBase extends ezcWorkflowNode
      * @param mixed $configuration
      * @throws ezcWorkflowDefinitionStorageException
      */
-    public function __construct( $configuration )
-    {
-        parent::__construct( $configuration );
-    }
 
     /**
      * Executes this node and returns true.
