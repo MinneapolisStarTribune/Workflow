@@ -9,9 +9,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -260,10 +260,10 @@ abstract class ezcWorkflowExecution
         $this->suspended = false;
 
         /**
-         * Restructure start/resume to a more standard transaction-based paradigm with 
-         * try/catch. Ensure we return the execution id, else we do not know what to 
-         * resume. Set variable 'exception' to the exception message, if one was caught 
-         * here. 
+         * Restructure start/resume to a more standard transaction-based paradigm with
+         * try/catch. Ensure we return the execution id, else we do not know what to
+         * resume. Set variable 'exception' to the exception message, if one was caught
+         * here.
          */
         $this->beginTransaction();
         try {
@@ -365,8 +365,8 @@ abstract class ezcWorkflowExecution
         $this->suspended = false;
 
         /**
-         * Restructure start/resume to a more standard transaction-based paradigm with 
-         * try/catch 
+         * Restructure start/resume to a more standard transaction-based paradigm with
+         * try/catch
          */
         $this->beginTransaction();
         try {
@@ -397,9 +397,9 @@ abstract class ezcWorkflowExecution
         if ( !empty( $errors ) )
         {
             /**
-             * If we are using the database tie-in, we have begun a transaction. Roll it 
-             * back before throwing the exception so that the database remains in an 
-             * acceptable state. 
+             * If we are using the database tie-in, we have begun a transaction. Roll it
+             * back before throwing the exception so that the database remains in an
+             * acceptable state.
              */
             $this->rollback();
             throw new ezcWorkflowInvalidInputException( $errors );
@@ -413,10 +413,10 @@ abstract class ezcWorkflowExecution
 
             $this->execute();
         } catch (\Exception $e) {
-            $this->setVariable('exception', $e->getMessage());                
-            if(!($this->isSuspended())) {                                     
-                $this->suspend();                                             
-            }                                                                 
+            $this->setVariable('exception', $e->getMessage());
+            if(!($this->isSuspended())) {
+                $this->suspend();
+            }
             $this->commit();
             throw $e;
         }
@@ -510,7 +510,10 @@ abstract class ezcWorkflowExecution
 
             if ( $node !== null )
             {
-                $this->endThread( $node->getThreadId() );
+                if ( $node->getThreadId() !== null )
+                {
+                    $this->endThread( $node->getThreadId() );
+                }
 
                 foreach ( $this->plugins as $plugin )
                 {
@@ -572,11 +575,11 @@ abstract class ezcWorkflowExecution
                     unset( $this->activatedNodes[$key] );
                     $this->numActivatedNodes--;
                     /**
-                     * Two node counts must remain in sync - the number of activated nodes, and the 
-                     * number of end nodes. 
-                     *  
-                     * When testing for End Node, test for not being Cancel Node, because Cancel 
-                     * Node is a subclass of End Node. 
+                     * Two node counts must remain in sync - the number of activated nodes, and the
+                     * number of end nodes.
+                     *
+                     * When testing for End Node, test for not being Cancel Node, because Cancel
+                     * Node is a subclass of End Node.
                      */
                     if($node instanceof ezcWorkflowNodeEnd &&
                        !$node instanceof ezcWorkflowNodeCancel) {
@@ -933,10 +936,10 @@ abstract class ezcWorkflowExecution
     }
 
     /**
-     * Returns the next thread ID. 
-     *  
-     * @return int 
-     * @ignore 
+     * Returns the next thread ID.
+     *
+     * @return int
+     * @ignore
      */
     public function getNextThreadId()
     {
