@@ -510,7 +510,7 @@ abstract class ezcWorkflowExecution
 
             if ( $node !== null )
             {
-                if ( $node->getThreadId() !== null )
+                if ( $node->getThreadId() !== null && $node->getThreadId() !== "0")
                 {
                     $this->endThread( $node->getThreadId() );
                 }
